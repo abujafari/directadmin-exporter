@@ -1,6 +1,7 @@
 package exporter
 
 import (
+	"crypto/tls"
 	"fmt"
 	"io"
 	"log"
@@ -50,7 +51,14 @@ func ValidateAPIConfiguration(config APIConfiguration) error {
 // APIRequest performs a request to the DirectAdmin API.
 func APIRequest(config APIConfiguration) ([]byte, error) {
 	// Perform a request to the DirectAdmin API
-	resp, err := http.Get(fmt.Sprintf(urlFormat, config.Protocol,
+
+	tr := &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+	}
+
+	client := &http.Client{Transport: tr}
+
+	resp, err := client.Get(fmt.Sprintf(urlFormat, config.Protocol,
 		config.Username, config.Token, config.Hostname, config.Port))
 	if err != nil {
 		log.Println(err)
